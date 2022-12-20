@@ -15,15 +15,15 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import dev.ososuna.springsecurity.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
+
 @Component
+@RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
   private UserDetailsService userDetailsService;
-
-  public JwtAuthFilter(UserDetailsService userDetailsService) {
-    super();
-    this.userDetailsService = userDetailsService;
-  }
+  private final JwtUtil jwtUtil;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -36,12 +36,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       return;
     }
     jwtToken = authHeader.substring(7);
-    userEmail = "someUser"; // TODO: to be implemented
+    userEmail = jwtUtil.extractUsername(jwtToken);
 
     if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-      final boolean isTokenValid = true; // TODO: to be implemented
-      if (isTokenValid) {
+      if (jwtUtil.isTokenValid(jwtToken, userDetails)) {
         UsernamePasswordAuthenticationToken authToken =
           new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

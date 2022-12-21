@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-  private UserDao userDao;
+  private final UserDao userDao;
   private final JwtUtil jwtUtil;
 
   @Override
